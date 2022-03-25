@@ -1,0 +1,478 @@
+Enter password: ********
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 8.0.28 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+**************************************************
+UC1: Ability to create a payroll service database
+*************************************************
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sakila             |
+| sys                |
+| world              |
++--------------------+
+6 rows in set (0.00 sec)
+
+mysql> create database Payroll_Service;
+Query OK, 1 row affected (0.10 sec)
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| payroll_service    |
+| performance_schema |
+| sakila             |
+| sys                |
+| world              |
++--------------------+
+7 rows in set (0.69 sec)
+
+mysql> use payroll_service;
+Database changed
+mysql> SELECT DATABASE();
++-----------------+
+| DATABASE()      |
++-----------------+
+| payroll_service |
++-----------------+
+1 row in set (0.00 sec)
+
+
+*************************************************************************************************************
+UC2 = Ability to create a employee payroll table in the payroll service database to manage employee payrolls
+************************************************************************************************************
+
+mysql> create table payroll_service(
+    -> id INT unsigned not NULL auto_increment,
+    -> name varchar(150) not null,
+    -> salary double not null,
+    -> start_date DATE not NULL,
+    -> PRIMARY KEY (id)
+    -> );
+Query OK, 0 rows affected (2.76 sec)
+
+mysql> describe payroll_service;
++------------+--------------+------+-----+---------+----------------+
+| Field      | Type         | Null | Key | Default | Extra          |
++------------+--------------+------+-----+---------+----------------+
+| id         | int unsigned | NO   | PRI | NULL    | auto_increment |
+| name       | varchar(150) | NO   |     | NULL    |                |
+| salary     | double       | NO   |     | NULL    |                |
+| start_date | date         | NO   |     | NULL    |                |
++------------+--------------+------+-----+---------+----------------+
+4 rows in set (0.20 sec)
+
+*******************************************************************************************************
+UC3= Ability to create employee payroll data in the payroll service database as part of CRUD Operation
+*******************************************************************************************************
+
+mysql> insert into payroll_service (name,salary,start_date) values('Bill' ,1000000.00,'2018-01-03'),
+    -> ('Terisa', 2000000.00,'2019-01-03'),
+    -> ('Charlie', 3000000.00,'2020-03-21');
+Query OK, 3 rows affected (0.78 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+*******************************************************************************************************
+UC4= Ability to retrieve all the employee payroll data that is added to payroll service database
+******************************************************************************************************
+
+mysql> select * from payroll_service;
++----+---------+---------+------------+
+| id | name    | salary  | start_date |
++----+---------+---------+------------+
+|  1 | Bill    | 1000000 | 2018-01-03 |
+|  2 | Terisa  | 2000000 | 2019-01-03 |
+|  3 | Charlie | 3000000 | 2020-03-21 |
++----+---------+---------+------------+
+3 rows in set (0.11 sec)
+
+********************************************************************************************************************************************************************
+UC5= Ability to retrieve salary data for a particular employee as well as all employees who have joined in a particular data range from the payroll service database
+********************************************************************************************************************************************************************
+
+mysql> select salary FROM payroll_service WHERE name = 'Bill';
++---------+
+| salary  |
++---------+
+| 1000000 |
++---------+
+1 row in set (0.03 sec)
+
+mysql> select salary FROM payroll_service WHERE name = 'Charlie';
++---------+
+| salary  |
++---------+
+| 3000000 |
++---------+
+1 row in set (0.00 sec)
+
+mysql> select * from payroll_service where start_date between cast('2019-01-01' as date) and date(now());
++----+---------+---------+------------+
+| id | name    | salary  | start_date |
++----+---------+---------+------------+
+|  2 | Terisa  | 2000000 | 2019-01-03 |
+|  3 | Charlie | 3000000 | 2020-03-21 |
++----+---------+---------+------------+
+2 rows in set (0.05 sec)
+
+****************************************************************************************************************
+UC6= Ability to add Gender to Employee Payroll Table and Update the Rows to reflect the correct Employee Gender
+****************************************************************************************************************
+
+mysql> alter table payroll_service add gender char(1) AFTER name;
+Query OK, 0 rows affected (4.01 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> select * from payroll_service;
++----+---------+--------+---------+------------+
+| id | name    | gender | salary  | start_date |
++----+---------+--------+---------+------------+
+|  1 | Bill    | NULL   | 1000000 | 2018-01-03 |
+|  2 | Terisa  | NULL   | 2000000 | 2019-01-03 |
+|  3 | Charlie | NULL   | 3000000 | 2020-03-21 |
++----+---------+--------+---------+------------+
+3 rows in set (0.00 sec)
+
+mysql> update payroll_service set gender = 'M' where name = "Bill" or name = "Charlie";
+Query OK, 2 rows affected (0.09 sec)
+Rows matched: 2  Changed: 2  Warnings: 0
+
+mysql> update payroll_service set gender = 'F' WHERE name = 'Terisa';
+Query OK, 1 row affected (0.70 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from payroll_service;
++----+---------+--------+---------+------------+
+| id | name    | gender | salary  | start_date |
++----+---------+--------+---------+------------+
+|  1 | Bill    | M      | 1000000 | 2018-01-03 |
+|  2 | Terisa  | F      | 2000000 | 2019-01-03 |
+|  3 | Charlie | M      | 3000000 | 2020-03-21 |
++----+---------+--------+---------+------------+
+3 rows in set (0.00 sec)
+
+*************************************************************************************
+UC7= Ability to find sum, average, min, max and number of male and female employees
+***********************************************************************************
+
+mysql> select sum(salary) from payroll_service;
++-------------+
+| sum(salary) |
++-------------+
+|     6000000 |
++-------------+
+1 row in set (0.04 sec)
+
+mysql> select min(salary) from payroll_service;
++-------------+
+| min(salary) |
++-------------+
+|     1000000 |
++-------------+
+1 row in set (0.04 sec)
+
+mysql> select avg(salary) from payroll_service;
++-------------+
+| avg(salary) |
++-------------+
+|     2000000 |
++-------------+
+1 row in set (0.02 sec)
+
+mysql> select count(salary) from payroll_service;
++---------------+
+| count(salary) |
++---------------+
+|             3 |
++---------------+
+1 row in set (0.19 sec)
+
+mysql> select sum(salary) from payroll_service where gender = 'M' group by gender;
++-------------+
+| sum(salary) |
++-------------+
+|     4000000 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select avg(salary) from payroll_service where gender = 'M' group by gender;
++-------------+
+| avg(salary) |
++-------------+
+|     2000000 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select sum(salary) from payroll_service where gender = 'F' group by gender;
++-------------+
+| sum(salary) |
++-------------+
+|     2000000 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select * from payroll_service where gender = 'M' group by gender;
++----+------+--------+---------+------------+
+| id | name | gender | salary  | start_date |
++----+------+--------+---------+------------+
+|  1 | Bill | M      | 1000000 | 2018-01-03 |
++----+------+--------+---------+------------+
+1 row in set (0.00 sec)
+
+mysql> select gender, sum(salary) from payroll_service group by gender;
++--------+-------------+
+| gender | sum(salary) |
++--------+-------------+
+| M      |     4000000 |
+| F      |     2000000 |
++--------+-------------+
+2 rows in set (0.06 sec)
+
+mysql> select gender, avg(salary) from payroll_service group by gender;
++--------+-------------+
+| gender | avg(salary) |
++--------+-------------+
+| M      |     2000000 |
+| F      |     2000000 |
++--------+-------------+
+2 rows in set (0.10 sec)
+
+mysql> select gender, count(name) from payroll_service group by gender;
++--------+-------------+
+| gender | count(name) |
++--------+-------------+
+| M      |           2 |
+| F      |           1 |
++--------+-------------+
+2 rows in set (0.00 sec)
+
+mysql> select gender, count(salary) from payroll_service group by gender;
++--------+---------------+
+| gender | count(salary) |
++--------+---------------+
+| M      |             2 |
+| F      |             1 |
++--------+---------------+
+2 rows in set (0.00 sec)
+
+mysql> select gender, count(gender) from payroll_service group by gender;
++--------+---------------+
+| gender | count(gender) |
++--------+---------------+
+| M      |             2 |
+| F      |             1 |
++--------+---------------+
+2 rows in set (0.00 sec)
+
+*****************************************************************************************************************************************************
+UC8= Ability to extend employee_payroll data to store employee information like employee phone, address and department - Ensure employee department
+****************************************************************************************************************************************************
+
+mysql> alter table payroll_service add phone_number bigint after name;
+Query OK, 0 rows affected (4.12 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> alter table payroll_service add address varchar(250) after phone_number;
+Query OK, 0 rows affected (3.09 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> alter table payroll_service add department varchar(150) not null after address;
+Query OK, 0 rows affected (1.42 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> select * from payroll_service;
++----+---------+--------------+---------+------------+--------+---------+------------+
+| id | name    | phone_number | address | department | gender | salary  | start_date |
++----+---------+--------------+---------+------------+--------+---------+------------+
+|  1 | Bill    |         NULL | NULL    |            | M      | 1000000 | 2018-01-03 |
+|  2 | Terisa  |         NULL | NULL    |            | F      | 2000000 | 2019-01-03 |
+|  3 | Charlie |         NULL | NULL    |            | M      | 3000000 | 2020-03-21 |
++----+---------+--------------+---------+------------+--------+---------+------------+
+3 rows in set (0.00 sec)
+
+mysql> describe payroll_service;
++--------------+--------------+------+-----+---------+----------------+
+| Field        | Type         | Null | Key | Default | Extra          |
++--------------+--------------+------+-----+---------+----------------+
+| id           | int unsigned | NO   | PRI | NULL    | auto_increment |
+| name         | varchar(150) | NO   |     | NULL    |                |
+| phone_number | bigint       | YES  |     | NULL    |                |
+| address      | varchar(250) | YES  |     | NULL    |                |
+| department   | varchar(150) | NO   |     | NULL    |                |
+| gender       | char(1)      | YES  |     | NULL    |                |
+| salary       | double       | NO   |     | NULL    |                |
+| start_date   | date         | NO   |     | NULL    |                |
++--------------+--------------+------+-----+---------+----------------+
+8 rows in set (0.16 sec)
+
+***************************************************************************************************************
+UC9= Ability to extend employee_payroll table to have Basic Pay, Deductions, Taxable Pay, Income Tax, Net Pay
+***************************************************************************************************************
+
+mysql> alter table payroll_service add basic_pay double not null after salary;
+Query OK, 0 rows affected (2.75 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> alter table payroll_service add deductions double not null after basic_pay;
+Query OK, 0 rows affected (2.23 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> alter table payroll_service add taxable_pay double not null after deductions;
+Query OK, 0 rows affected (2.36 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> alter table payroll_service add income_tax double not null after taxable_pay;
+Query OK, 0 rows affected (2.66 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> alter table payroll_service add net_pay double not null after income_tax;
+Query OK, 0 rows affected (1.16 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> describe payroll_service;
++--------------+--------------+------+-----+---------+----------------+
+| Field        | Type         | Null | Key | Default | Extra          |
++--------------+--------------+------+-----+---------+----------------+
+| id           | int unsigned | NO   | PRI | NULL    | auto_increment |
+| name         | varchar(150) | NO   |     | NULL    |                |
+| phone_number | bigint       | YES  |     | NULL    |                |
+| address      | varchar(250) | YES  |     | NULL    |                |
+| department   | varchar(150) | NO   |     | NULL    |                |
+| gender       | char(1)      | YES  |     | NULL    |                |
+| salary       | double       | NO   |     | NULL    |                |
+| basic_pay    | double       | NO   |     | NULL    |                |
+| deductions   | double       | NO   |     | NULL    |                |
+| taxable_pay  | double       | NO   |     | NULL    |                |
+| income_tax   | double       | NO   |     | NULL    |                |
+| net_pay      | double       | NO   |     | NULL    |                |
+| start_date   | date         | NO   |     | NULL    |                |
++--------------+--------------+------+-----+---------+----------------+
+13 rows in set (0.09 sec)
+
+mysql> select * from payroll_service;
++----+---------+--------------+---------+------------+--------+---------+-----------+------------+-------------+------------+---------+------------+
+| id | name    | phone_number | address | department | gender | salary  | basic_pay | deductions | taxable_pay | income_tax | net_pay | start_date |
++----+---------+--------------+---------+------------+--------+---------+-----------+------------+-------------+------------+---------+------------+
+|  1 | Bill    |         NULL | NULL    |            | M      | 1000000 |         0 |          0 |           0 |          0 |       0 | 2018-01-03 |
+|  2 | Terisa  |         NULL | NULL    |            | F      | 2000000 |         0 |          0 |           0 |          0 |       0 | 2019-01-03 |
+|  3 | Charlie |         NULL | NULL    |            | M      | 3000000 |         0 |          0 |           0 |          0 |       0 | 2020-03-21 |
++----+---------+--------------+---------+------------+--------+---------+-----------+------------+-------------+------------+---------+------------+
+3 rows in set (0.00 sec)
+
+************************************************************************
+UC10= Ability to make Terissa as part of Sales and Marketing Department
+************************************************************************
+
+mysql> insert into payroll_service(name, phone_number, address, department, gender, salary, basic_pay, deductions, taxable_pay, income_tax, net_pay, start_date) values
+    -> ("Terissa", NULL, NULL, "Marketing", 'F', 5000000, 0, 0, 0, 0, 0, "2021-10-09");
+Query OK, 1 row affected (0.23 sec)
+
+mysql> select * from payroll_service;
++----+---------+--------------+---------+------------+--------+---------+-----------+------------+-------------+------------+---------+------------+
+| id | name    | phone_number | address | department | gender | salary  | basic_pay | deductions | taxable_pay | income_tax | net_pay | start_date |
++----+---------+--------------+---------+------------+--------+---------+-----------+------------+-------------+------------+---------+------------+
+|  1 | Bill    |         NULL | NULL    |            | M      | 1000000 |         0 |          0 |           0 |          0 |       0 | 2018-01-03 |
+|  2 | Terisa  |         NULL | NULL    |            | F      | 2000000 |         0 |          0 |           0 |          0 |       0 | 2019-01-03 |
+|  3 | Charlie |         NULL | NULL    |            | M      | 3000000 |         0 |          0 |           0 |          0 |       0 | 2020-03-21 |
+|  4 | Terissa |         NULL | NULL    | Marketing  | F      | 5000000 |         0 |          0 |           0 |          0 |       0 | 2021-10-09 |
++----+---------+--------------+---------+------------+--------+---------+-----------+------------+-------------+------------+---------+------------+
+
+
+mysql> show tables;
++---------------------------+
+| Tables_in_payroll_service |
++---------------------------+
+| payroll_service           |
++---------------------------+
+1 row in set (0.01 sec)
+
+mysql> create table company
+    -> (company_ID INT PRIMARY KEY,
+    -> company_Name VARCHAR(15) NOT NULL
+    -> );
+Query OK, 0 rows affected (1.93 sec)
+
+mysql> describe company;
++--------------+-------------+------+-----+---------+-------+
+| Field        | Type        | Null | Key | Default | Extra |
++--------------+-------------+------+-----+---------+-------+
+| company_ID   | int         | NO   | PRI | NULL    |       |
+| company_Name | varchar(15) | NO   |     | NULL    |       |
++--------------+-------------+------+-----+---------+-------+
+2 rows in set (0.12 sec)
+
+mysql> insert into company (company_ID, company_Name) values
+    -> (1, 'bridgelabz');
+Query OK, 1 row affected (0.26 sec)
+
+mysql> select * from company;
++------------+--------------+
+| company_ID | company_Name |
++------------+--------------+
+|          1 | bridgelabz   |
++------------+--------------+
+1 row in set (0.00 sec)
+
+mysql> create table employee
+    -> (
+    ->  id INT unsigned NOT NULL AUTO_INCREMENT,
+    -> name VARCHAR(100) NOT NULL,
+    -> salary DOUBLE NOT NULL,
+    -> company_ID INT,
+    -> Foreign Key (company_ID) REFERENCES Company (company_ID),
+    -> PRIMARY KEY (id)
+    -> );
+Query OK, 0 rows affected (1.68 sec)
+
+mysql> describe employee;
++------------+--------------+------+-----+---------+----------------+
+| Field      | Type         | Null | Key | Default | Extra          |
++------------+--------------+------+-----+---------+----------------+
+| id         | int unsigned | NO   | PRI | NULL    | auto_increment |
+| name       | varchar(100) | NO   |     | NULL    |                |
+| salary     | double       | NO   |     | NULL    |                |
+| company_ID | int          | YES  | MUL | NULL    |                |
++------------+--------------+------+-----+---------+----------------+
+4 rows in set (0.04 sec)
+
+mysql> insert into employee( name, salary, company_ID) values
+    -> ( 'rutuja', 30000, 1);
+Query OK, 1 row affected (0.17 sec)
+
+mysql> select * from employee;
++----+--------+--------+------------+
+| id | name   | salary | company_ID |
++----+--------+--------+------------+
+|  1 | rutuja |  30000 |          1 |
++----+--------+--------+------------+
+1 row in set (0.00 sec)
+
+mysql> show tables;
++---------------------------+
+| Tables_in_payroll_service |
++---------------------------+
+| company                   |
+| employee                  |
+| payroll_service           |
++---------------------------+
+3 rows in set (0.04 sec)
+4 rows in set (0.00 sec)
